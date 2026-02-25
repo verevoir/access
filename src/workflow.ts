@@ -5,7 +5,11 @@ import type {
   WorkflowConfig,
 } from './types.js';
 
-/** Create a stateless workflow evaluator from a configuration. */
+/**
+ * Create a stateless workflow evaluator. Validates that all states and transitions
+ * are consistent at creation time — throws if `initial` is not in `states` or any
+ * transition references an unknown state.
+ */
 export function defineWorkflow(config: WorkflowConfig): Workflow {
   const { name, states, initial, transitions } = config;
 

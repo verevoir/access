@@ -1,11 +1,14 @@
 import type { Guard } from './types.js';
 
-/** Guard that passes if the identity has any of the specified roles. */
+/** Returns a guard that passes if the identity has **any** of the specified roles. */
 export function hasRole(...roles: string[]): Guard {
   return (identity) => roles.some((role) => identity.roles.includes(role));
 }
 
-/** Guard that passes if identity.id matches the owner in context. */
+/**
+ * Returns a guard that passes if `identity.id` matches `context[ownerField]`.
+ * Defaults to looking up `context.ownerId`. Returns `false` if context is missing.
+ */
 export function isOwner(ownerField: string = 'ownerId'): Guard {
   return (identity, context) => {
     if (!context) return false;

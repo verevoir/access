@@ -1,6 +1,9 @@
 import type { Identity, Policy, PolicyConfig } from './types.js';
 
-/** Create a policy from a set of rules. */
+/**
+ * Create a policy from a set of rules. The returned policy is deny-by-default —
+ * access is only granted when a rule explicitly matches.
+ */
 export function definePolicy(config: PolicyConfig): Policy {
   return {
     rules: config.rules,
@@ -14,7 +17,12 @@ export function definePolicy(config: PolicyConfig): Policy {
   };
 }
 
-/** Evaluate whether an identity can perform an action under a policy. */
+/**
+ * Evaluate whether an identity can perform an action under a policy.
+ * Returns `true` on the first matching rule. Rules with `scope: 'own'`
+ * only match when `context.ownerId` equals `identity.id`.
+ * Returns `false` if no rule matches (deny-by-default).
+ */
 export function can(
   policy: Policy,
   identity: Identity,

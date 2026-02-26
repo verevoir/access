@@ -21,6 +21,7 @@
     "url": "git+ssh://git@github.com:adsurg/next-lake-access.git"
   },
   "scripts": {
+    "build": "tsup",
     "prepare": "npm run build",
     "test": "vitest run",
     "lint": "eslint . && prettier --check .",

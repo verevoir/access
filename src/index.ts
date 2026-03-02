@@ -23,4 +23,5 @@ export type {
   Transition,
   WorkflowConfig,
   Workflow,
+  RoleStore,
 } from './types.js';

@@ -33,7 +33,7 @@ export interface GoogleAuthAdapterOptions {
   /** Optional — restrict to a Google Workspace domain (matches the `hd` claim). */
   hostedDomain?: string;
   /** Optional — map a token payload to roles. Defaults to `['viewer']`. */
-  mapRoles?: (payload: TokenPayload) => string[];
+  mapRoles?: (payload: TokenPayload) => string[] | Promise<string[]>;
 }
 
 /**
@@ -62,7 +62,7 @@ export function createGoogleAuthAdapter(
 
         if (hostedDomain && payload.hd !== hostedDomain) return null;
 
-        const roles = mapRoles ? mapRoles(payload) : ['viewer'];
+        const roles = mapRoles ? await mapRoles(payload) : ['viewer'];
 
         return {
           id: payload.sub,

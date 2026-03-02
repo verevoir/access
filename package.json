@@ -16,6 +16,16 @@
       "types": "./dist/google.d.ts",
       "import": "./dist/google.js",
       "require": "./dist/google.cjs"
+    },
+    "./test-accounts": {
+      "types": "./dist/test-accounts.d.ts",
+      "import": "./dist/test-accounts.js",
+      "require": "./dist/test-accounts.cjs"
+    },
+    "./role-store": {
+      "types": "./dist/role-store.d.ts",
+      "import": "./dist/role-store.js",
+      "require": "./dist/role-store.cjs"
     }
   },
   "files": [
@@ -33,14 +43,19 @@
     "format": "prettier --write ."
   },
   "peerDependencies": {
-    "google-auth-library": "^9.0.0"
+    "google-auth-library": "^9.0.0",
+    "@nextlake/storage": ">=0.1.0"
   },
   "peerDependenciesMeta": {
     "google-auth-library": {
       "optional": true
+    },
+    "@nextlake/storage": {
+      "optional": true
     }
   },
   "devDependencies": {
+    "@nextlake/storage": "file:../storage-adapter",
     "@eslint/js": "^9.39.3",
     "eslint": "^9.39.3",
     "eslint-config-prettier": "^10.1.8",

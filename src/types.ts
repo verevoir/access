@@ -91,3 +91,10 @@ export interface Workflow {
     context?: Record<string, unknown>,
   ): boolean;
 }
+
+/** Persistent user→roles mapping. */
+export interface RoleStore {
+  getRoles(userId: string): Promise<string[]>;
+  setRoles(userId: string, roles: string[]): Promise<void>;
+  listAssignments(): Promise<{ userId: string; roles: string[] }[]>;
+}

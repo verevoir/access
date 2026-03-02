@@ -93,3 +93,7 @@ make run     # No-op (library, not a service)
 - `src/index.ts` — Public API exports
 - `src/google/auth-adapter.ts` — `createGoogleAuthAdapter()` — verifies Google ID tokens via OAuth2Client
 - `src/google.ts` — Subpath entry point (`@nextlake/access/google`)
+- `src/test-accounts/auth-adapter.ts` — `createTestAuthAdapter()` — lookup-table adapter for development and testing
+- `src/test-accounts.ts` — Subpath entry point (`@nextlake/access/test-accounts`)
+- `src/role-store/store.ts` — `createRoleStore()` — persistent user→roles mapping backed by any StorageAdapter (structural typing, no import)
+- `src/role-store.ts` — Subpath entry point (`@nextlake/access/role-store`)

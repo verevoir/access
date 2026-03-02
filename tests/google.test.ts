@@ -170,6 +170,21 @@ describe('createGoogleAuthAdapter', () => {
     expect(identity!.roles).toEqual(['viewer']);
   });
 
+  it('supports async mapRoles', async () => {
+    const adapter = createGoogleAuthAdapter({
+      client: mock.client,
+      allowedClientIds: [CLIENT_ID],
+      mapRoles: async (payload) => {
+        // Simulate an async lookup (e.g. from a role store)
+        await new Promise((r) => setTimeout(r, 1));
+        return payload.hd === 'example.com' ? ['admin'] : ['viewer'];
+      },
+    });
+
+    const identity = await adapter.resolve('valid-token');
+    expect(identity!.roles).toEqual(['admin']);
+  });
+
   it('handles missing optional claims gracefully', async () => {
     mock.tokens.set('minimal-token', {
       sub: 'google-minimal',

@@ -1,5 +1,6 @@
 // Identity
 export { defineAuthAdapter } from './auth.js';
+export { ANONYMOUS, isAnonymous } from './anonymous.js';
 
 // Policy
 export { definePolicy, can } from './policy.js';

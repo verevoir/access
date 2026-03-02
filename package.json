@@ -11,6 +11,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./google": {
+      "types": "./dist/google.d.ts",
+      "import": "./dist/google.js",
+      "require": "./dist/google.cjs"
     }
   },
   "files": [
@@ -26,6 +31,14 @@
     "test": "vitest run",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write ."
+  },
+  "peerDependencies": {
+    "google-auth-library": "^9.0.0"
+  },
+  "peerDependenciesMeta": {
+    "google-auth-library": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",

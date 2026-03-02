@@ -85,8 +85,11 @@ make run     # No-op (library, not a service)
 ## Architecture
 
 - `src/types.ts` — Core interfaces: Identity, AuthAdapter, PolicyRule, Transition, Policy, Workflow
+- `src/anonymous.ts` — `ANONYMOUS` frozen viewer identity, `isAnonymous()` structural check
 - `src/auth.ts` — `defineAuthAdapter()` — wraps a resolve function into an AuthAdapter
 - `src/guards.ts` — Composable guard functions: `hasRole`, `isOwner`, `and`, `or`, `not`
 - `src/policy.ts` — `definePolicy()` — creates a policy from rules, `can()` for evaluation
 - `src/workflow.ts` — `defineWorkflow()` — creates a stateless workflow evaluator
 - `src/index.ts` — Public API exports
+- `src/google/auth-adapter.ts` — `createGoogleAuthAdapter()` — verifies Google ID tokens via OAuth2Client
+- `src/google.ts` — Subpath entry point (`@nextlake/access/google`)

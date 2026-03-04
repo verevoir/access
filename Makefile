@@ -11,4 +11,4 @@ lint: ## Lint and check formatting
 	npx prettier --check .
 
 run: ## No-op (library)
-	@echo "@nextlake/access is a library, not a service."
+	@echo "@verevoir/access is a library, not a service."

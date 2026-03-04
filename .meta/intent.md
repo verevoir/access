@@ -1,4 +1,4 @@
-# Intent — @nextlake/access
+# Intent — @verevoir/access
 
 ## Purpose
 
@@ -28,5 +28,5 @@ Provide identity resolution, policy evaluation, and workflow state machines for 
 ## Constraints
 
 - Zero runtime dependencies
-- No imports from any `@nextlake/*` package
+- No imports from any `@verevoir/*` package
 - Guards must be synchronous (no async evaluation in transition checks)

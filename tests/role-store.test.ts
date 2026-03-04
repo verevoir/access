@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { MemoryAdapter } from '@nextlake/storage';
+import { MemoryAdapter } from '@verevoir/storage';
 import { createRoleStore } from '../src/role-store/store.js';
 
 describe('createRoleStore', () => {

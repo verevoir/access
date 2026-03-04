@@ -1,4 +1,4 @@
-# @nextlake/access
+# @verevoir/access
 
 Identity resolution, policy evaluation, and workflow state machines — defined as code, not configuration. Zero runtime dependencies. Works with or without NextLake.
 
@@ -12,7 +12,7 @@ Identity resolution, policy evaluation, and workflow state machines — defined 
 ## Install
 
 ```bash
-npm install @nextlake/access
+npm install @verevoir/access
 ```
 
 ## Quick Example
@@ -26,7 +26,7 @@ import {
   isOwner,
   or,
   can,
-} from '@nextlake/access';
+} from '@verevoir/access';
 
 // Identity — bridge to your IdP
 const auth = defineAuthAdapter({

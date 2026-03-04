@@ -1,6 +1,6 @@
 import type { RoleStore } from '../types.js';
 
-/** Structural type — only the methods createRoleStore actually uses. No import from @nextlake/storage. */
+/** Structural type — only the methods createRoleStore actually uses. No import from @verevoir/storage. */
 interface StorageAdapter {
   create(
     blockType: string,

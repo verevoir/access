@@ -1,7 +1,8 @@
 {
-  "name": "@nextlake/access",
-  "version": "0.1.0",
+  "name": "@verevoir/access",
+  "version": "0.2.0-alpha.1",
   "description": "Identity resolution, policy evaluation, and workflow state machines",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -44,18 +45,18 @@
   },
   "peerDependencies": {
     "google-auth-library": "^9.0.0",
-    "@nextlake/storage": ">=0.1.0"
+    "@verevoir/storage": "0.3.0-alpha.1"
   },
   "peerDependenciesMeta": {
     "google-auth-library": {
       "optional": true
     },
-    "@nextlake/storage": {
+    "@verevoir/storage": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@nextlake/storage": "file:../storage-adapter",
+    "@verevoir/storage": "0.3.0-alpha.1",
     "@eslint/js": "^9.39.3",
     "eslint": "^9.39.3",
     "eslint-config-prettier": "^10.1.8",

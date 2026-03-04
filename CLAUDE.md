@@ -1,4 +1,4 @@
-# @nextlake/access — Access Control & Workflows
+# @verevoir/access — Access Control & Workflows
 
 Identity resolution, policy evaluation, and workflow state machines for structured content. Standalone — works with or without NextLake.
 
@@ -29,7 +29,7 @@ import {
   and,
   or,
   can,
-} from '@nextlake/access';
+} from '@verevoir/access';
 
 // Identity resolution
 const auth = defineAuthAdapter({
@@ -92,8 +92,8 @@ make run     # No-op (library, not a service)
 - `src/workflow.ts` — `defineWorkflow()` — creates a stateless workflow evaluator
 - `src/index.ts` — Public API exports
 - `src/google/auth-adapter.ts` — `createGoogleAuthAdapter()` — verifies Google ID tokens via OAuth2Client
-- `src/google.ts` — Subpath entry point (`@nextlake/access/google`)
+- `src/google.ts` — Subpath entry point (`@verevoir/access/google`)
 - `src/test-accounts/auth-adapter.ts` — `createTestAuthAdapter()` — lookup-table adapter for development and testing
-- `src/test-accounts.ts` — Subpath entry point (`@nextlake/access/test-accounts`)
+- `src/test-accounts.ts` — Subpath entry point (`@verevoir/access/test-accounts`)
 - `src/role-store/store.ts` — `createRoleStore()` — persistent user→roles mapping backed by any StorageAdapter (structural typing, no import)
-- `src/role-store.ts` — Subpath entry point (`@nextlake/access/role-store`)
+- `src/role-store.ts` — Subpath entry point (`@verevoir/access/role-store`)

@@ -31,12 +31,14 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "llms.txt"
   ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com:verevoir/access.git"
   },
+  "funding": "https://buymeacoffee.com/verevoir",
   "scripts": {
     "build": "tsup",
     "prepare": "npm run build",

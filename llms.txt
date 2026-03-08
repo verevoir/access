@@ -1,0 +1,135 @@
+# @verevoir/access
+
+> Identity resolution, policy evaluation, and workflow state machines. Zero runtime dependencies. Standalone — no Verevoir package imports required.
+
+## Install
+
+```bash
+npm install @verevoir/access
+```
+
+## Core Exports
+
+### Identity & Auth
+
+```typescript
+import { defineAuthAdapter, ANONYMOUS, isAnonymous } from '@verevoir/access';
+
+// Define how tokens resolve to identities
+const auth = defineAuthAdapter({
+  resolve: async (token: string): Promise<Identity | null> => {
+    // Verify token, return identity
+    return { id: 'user-123', roles: ['admin'], metadata: { name: 'Alice' } };
+  },
+});
+
+const identity = await auth.resolve(token);
+
+// ANONYMOUS — frozen identity with roles: ['viewer']
+// isAnonymous(identity) — structural check (not reference equality)
+```
+
+### Policy & Authorisation
+
+```typescript
+import { definePolicy, can, hasRole, isOwner, and, or, not } from '@verevoir/access';
+
+const policy = definePolicy({
+  rules: [
+    { action: 'read', guard: hasRole('viewer') },
+    { action: 'create', guard: hasRole('editor') },
+    { action: 'update', guard: or(hasRole('admin'), and(hasRole('editor'), isOwner())) },
+    { action: 'delete', guard: hasRole('admin') },
+  ],
+});
+
+// Check permission
+const allowed = can(policy, identity, 'update', { ownerId: identity.id });
+```
+
+Guards: `hasRole(role)`, `isOwner()`, `and(...guards)`, `or(...guards)`, `not(guard)`
+
+The `isOwner()` guard checks `identity.id === context.ownerId`.
+
+### Workflow
+
+Stateless state machine with guard-protected transitions.
+
+```typescript
+import { defineWorkflow, hasRole } from '@verevoir/access';
+
+const publishing = defineWorkflow({
+  states: ['draft', 'review', 'published', 'archived'],
+  transitions: [
+    { from: 'draft', to: 'review', guard: hasRole('editor') },
+    { from: 'review', to: 'published', guard: hasRole('admin') },
+    { from: 'review', to: 'draft', guard: hasRole('editor') },
+    { from: 'published', to: 'archived', guard: hasRole('admin') },
+  ],
+});
+
+// Get available transitions for current state and identity
+const transitions = publishing.transitions('draft', identity);
+// [{ from: 'draft', to: 'review', guard: ... }] if identity has 'editor' role
+```
+
+## Subpath Exports
+
+### @verevoir/access/google
+
+Google OAuth2 auth adapter. Optional peer dep: `google-auth-library`.
+
+```typescript
+import { createGoogleAuthAdapter } from '@verevoir/access/google';
+
+const auth = createGoogleAuthAdapter({
+  clientId: process.env.GOOGLE_CLIENT_ID,
+  mapRoles: async (googleId) => ['viewer'], // sync or async
+});
+```
+
+### @verevoir/access/test-accounts
+
+Lookup-table auth adapter for development and testing.
+
+```typescript
+import { createTestAuthAdapter } from '@verevoir/access/test-accounts';
+
+const auth = createTestAuthAdapter([
+  { token: 'admin-token', identity: { id: 'admin-1', roles: ['admin'] } },
+  { token: 'viewer-token', identity: { id: 'viewer-1', roles: ['viewer'] } },
+]);
+```
+
+### @verevoir/access/role-store
+
+Persistent user-to-roles mapping via StorageAdapter (structural type — no import from @verevoir/storage).
+
+```typescript
+import { createRoleStore } from '@verevoir/access/role-store';
+
+const roleStore = createRoleStore({
+  storage: db, // any StorageAdapter-compatible object
+  seedAdmin: 'google-123', // optional: auto-creates admin on first match
+});
+
+const roles = await roleStore.getRoles('google-123');
+await roleStore.setRoles('google-456', ['editor']);
+const all = await roleStore.listAssignments();
+```
+
+## Types
+
+```typescript
+interface Identity {
+  id: string;
+  roles: string[];
+  metadata?: Record<string, unknown>;
+}
+
+interface RoleStore {
+  getRoles(userId: string): Promise<string[]>;
+  setRoles(userId: string, roles: string[]): Promise<void>;
+  listAssignments(): Promise<{ userId: string; roles: string[] }[]>;
+}
+```

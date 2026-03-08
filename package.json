@@ -2,6 +2,7 @@
   "name": "@verevoir/access",
   "version": "0.2.0-beta.1",
   "description": "Identity resolution, policy evaluation, and workflow state machines",
+  "homepage": "https://verevoir.io",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -125,6 +125,11 @@ publishing.availableTransitions('review', identity); // [Transition, ...]
 - **Workflows as code.** State machines are stateless evaluators — the developer stores current state in their document.
 - **Zero runtime dependencies.** Standalone library, useful with or without Verevoir.
 
+## Documentation
+
+- [Access Control](https://verevoir.io/docs/access-control) — auth adapters, policies, guards, workflows, and integration patterns
+- [Integration Guide](https://verevoir.io/docs/integration) — connecting content models, storage, editor, and more
+
 ## Development
 
 ```bash

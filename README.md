@@ -1,6 +1,6 @@
 # @verevoir/access
 
-Identity resolution, policy evaluation, and workflow state machines — defined as code, not configuration. Zero runtime dependencies. Works with or without NextLake.
+Identity resolution, policy evaluation, and workflow state machines — defined as code, not configuration. Zero runtime dependencies. Works with or without Verevoir.
 
 ## What It Does
 
@@ -120,10 +120,10 @@ publishing.availableTransitions('review', identity); // [Transition, ...]
 ## Design Decisions
 
 - **Identity, not authentication.** Consumes tokens from any OIDC/SSO/session provider; does not handle login flows.
-- **Roles from the IdP.** Roles and groups come from the identity provider, not stored by NextLake.
+- **Roles from the IdP.** Roles and groups come from the identity provider, not stored by Verevoir.
 - **Policy as code.** Role→action mappings defined in TypeScript, not a database.
 - **Workflows as code.** State machines are stateless evaluators — the developer stores current state in their document.
-- **Zero runtime dependencies.** Standalone library, useful with or without NextLake.
+- **Zero runtime dependencies.** Standalone library, useful with or without Verevoir.
 
 ## Development
 

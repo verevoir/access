@@ -1,6 +1,6 @@
 # @verevoir/access — Access Control & Workflows
 
-Identity resolution, policy evaluation, and workflow state machines for structured content. Standalone — works with or without NextLake.
+Identity resolution, policy evaluation, and workflow state machines for structured content. Standalone — works with or without Verevoir.
 
 ## What It Does
 
@@ -12,7 +12,7 @@ Identity resolution, policy evaluation, and workflow state machines for structur
 ## Design Principles
 
 - **Identity, not authentication** — consumes tokens; does not handle login flows
-- **Roles from the IdP** — roles and groups come from the identity provider, not stored by NextLake
+- **Roles from the IdP** — roles and groups come from the identity provider, not stored by Verevoir
 - **Policy as code** — role→action mappings defined in TypeScript, not a database
 - **Workflows as code** — state machines with guard-protected transitions
 - **Zero runtime dependencies** — standalone library

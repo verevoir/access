@@ -37,9 +37,10 @@ interface AuthAdapter {
 The consumer's application code selects the adapter at startup, typically based on an environment variable:
 
 ```typescript
-const auth = process.env.AUTH_MODE === 'test'
-  ? createTestAuthAdapter(testAccounts)
-  : createGoogleAuthAdapter(oauthClient);
+const auth =
+  process.env.AUTH_MODE === 'test'
+    ? createTestAuthAdapter(testAccounts)
+    : createGoogleAuthAdapter(oauthClient);
 ```
 
 ## Consequences

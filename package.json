@@ -19,6 +19,16 @@
       "import": "./dist/google.js",
       "require": "./dist/google.cjs"
     },
+    "./apple": {
+      "types": "./dist/apple.d.ts",
+      "import": "./dist/apple.js",
+      "require": "./dist/apple.cjs"
+    },
+    "./oidc": {
+      "types": "./dist/oidc.d.ts",
+      "import": "./dist/oidc.js",
+      "require": "./dist/oidc.cjs"
+    },
     "./test-accounts": {
       "types": "./dist/test-accounts.d.ts",
       "import": "./dist/test-accounts.js",
@@ -28,6 +38,11 @@
       "types": "./dist/role-store.d.ts",
       "import": "./dist/role-store.js",
       "require": "./dist/role-store.cjs"
+    },
+    "./api-keys": {
+      "types": "./dist/api-keys.d.ts",
+      "import": "./dist/api-keys.js",
+      "require": "./dist/api-keys.cjs"
     }
   },
   "files": [

@@ -93,7 +93,15 @@ make run     # No-op (library, not a service)
 - `src/index.ts` — Public API exports
 - `src/google/auth-adapter.ts` — `createGoogleAuthAdapter()` — verifies Google ID tokens via OAuth2Client
 - `src/google.ts` — Subpath entry point (`@verevoir/access/google`)
+- `src/apple/auth-adapter.ts` — `createAppleAuthAdapter()` — verifies Apple ID tokens via injected verifier
+- `src/apple.ts` — Subpath entry point (`@verevoir/access/apple`)
+- `src/oidc/auth-adapter.ts` — `createOIDCAuthAdapter()` — generic OIDC adapter for any compliant provider (Okta, Azure AD, Auth0, Keycloak)
+- `src/oidc.ts` — Subpath entry point (`@verevoir/access/oidc`)
 - `src/test-accounts/auth-adapter.ts` — `createTestAuthAdapter()` — lookup-table adapter for development and testing
 - `src/test-accounts.ts` — Subpath entry point (`@verevoir/access/test-accounts`)
 - `src/role-store/store.ts` — `createRoleStore()` — persistent user→roles mapping backed by any StorageAdapter (structural typing, no import)
 - `src/role-store.ts` — Subpath entry point (`@verevoir/access/role-store`)
+- `src/api-keys/types.ts` — ApiKey, SecretInfo, StorageAdapter interfaces
+- `src/api-keys/store.ts` — `createApiKeyStore()` — dual-secret API key management with zero-downtime rotation
+- `src/api-keys/auth-adapter.ts` — `createApiKeyAuthAdapter()` — resolves `clientId:secret` to Identity
+- `src/api-keys.ts` — Subpath entry point (`@verevoir/access/api-keys`)

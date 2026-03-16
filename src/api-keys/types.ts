@@ -5,12 +5,12 @@ export interface SecretInfo {
   readonly createdBy: string;
 }
 
-/** An API key with dual secrets for zero-downtime rotation. */
+/** An API key with optional secondary secret for zero-downtime rotation. */
 export interface ApiKey {
   readonly clientId: string;
   readonly accountId: string;
   readonly primary: SecretInfo;
-  readonly secondary: SecretInfo;
+  readonly secondary?: SecretInfo;
   readonly createdAt: number;
   readonly createdBy: string;
 }

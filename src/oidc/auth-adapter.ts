@@ -41,9 +41,7 @@ export interface OIDCAuthAdapterOptions {
   /** Required — allowed audience values (matches the `aud` claim). */
   allowedAudiences: string[];
   /** Optional — map a token payload to roles. Defaults to `['viewer']`. */
-  mapRoles?: (
-    payload: OIDCTokenPayload,
-  ) => string[] | Promise<string[]>;
+  mapRoles?: (payload: OIDCTokenPayload) => string[] | Promise<string[]>;
 }
 
 /**
@@ -71,9 +69,7 @@ export function createOIDCAuthAdapter(
 
         // Validate audience
         if (payload.aud != null) {
-          const aud = Array.isArray(payload.aud)
-            ? payload.aud
-            : [payload.aud];
+          const aud = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
           if (!aud.some((a) => allowedAudiences.includes(a))) return null;
         }
 

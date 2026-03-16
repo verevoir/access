@@ -35,9 +35,7 @@ export interface AppleAuthAdapterOptions {
   /** Required — your Services ID or App Bundle ID (matches the `aud` claim). */
   clientId: string;
   /** Optional — map a token payload to roles. Defaults to `['viewer']`. */
-  mapRoles?: (
-    payload: AppleTokenPayload,
-  ) => string[] | Promise<string[]>;
+  mapRoles?: (payload: AppleTokenPayload) => string[] | Promise<string[]>;
 }
 
 /**

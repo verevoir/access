@@ -17,12 +17,11 @@ export interface ApiKeyStoreOptions {
 }
 
 export interface ApiKeyStore {
-  /** Create a new API key. Returns the key with raw secrets (only time they're available). */
+  /** Create a new API key with a single primary secret. */
   create(
     clientId: string,
     accountId: string,
-    primarySecret: string,
-    secondarySecret: string,
+    secret: string,
     createdBy: string,
   ): Promise<ApiKey>;
 
@@ -32,19 +31,18 @@ export interface ApiKeyStore {
   /** Verify a client ID + secret pair. Returns the API key if valid, null otherwise. */
   verify(clientId: string, secret: string): Promise<ApiKey | null>;
 
-  /** Rotate the primary secret. Returns the updated key (with new hash, not raw). */
-  rotatePrimary(
+  /**
+   * Rotate the primary secret. The new secret becomes primary,
+   * the old primary is demoted to secondary. Returns the updated key.
+   */
+  rotate(
     clientId: string,
     newSecret: string,
     rotatedBy: string,
   ): Promise<ApiKey>;
 
-  /** Rotate the secondary secret. Returns the updated key (with new hash, not raw). */
-  rotateSecondary(
-    clientId: string,
-    newSecret: string,
-    rotatedBy: string,
-  ): Promise<ApiKey>;
+  /** Drop the secondary secret immediately. Use after migration or on compromise. */
+  dropSecondary(clientId: string): Promise<ApiKey>;
 
   /** List all API keys for an account. */
   listByAccount(accountId: string): Promise<ApiKey[]>;
@@ -65,38 +63,46 @@ export function createApiKeyStore(options: ApiKeyStoreOptions): ApiKeyStore {
     return docs[0] ?? null;
   }
 
-  function toApiKey(doc: {
-    data: Record<string, unknown>;
-  }): ApiKey {
-    return {
+  function toApiKey(doc: { data: Record<string, unknown> }): ApiKey {
+    const key: ApiKey = {
       clientId: doc.data.clientId as string,
       accountId: doc.data.accountId as string,
       primary: doc.data.primary as SecretInfo,
-      secondary: doc.data.secondary as SecretInfo,
       createdAt: doc.data.createdAt as number,
       createdBy: doc.data.createdBy as string,
     };
+    if (doc.data.secondary) {
+      return { ...key, secondary: doc.data.secondary as SecretInfo };
+    }
+    return key;
   }
 
   return {
-    async create(clientId, accountId, primarySecret, secondarySecret, createdBy) {
+    async create(clientId, accountId, secret, createdBy) {
       const now = Math.floor(Date.now() / 1000);
-      const primaryHash = await hashSecret(primarySecret);
-      const secondaryHash = await hashSecret(secondarySecret);
+      const hash = await hashSecret(secret);
 
-      const primary: SecretInfo = { hash: primaryHash, createdAt: now, createdBy };
-      const secondary: SecretInfo = { hash: secondaryHash, createdAt: now, createdBy };
+      const primary: SecretInfo = {
+        hash,
+        createdAt: now,
+        createdBy,
+      };
 
       await storage.create(BLOCK_TYPE, {
         clientId,
         accountId,
         primary,
-        secondary,
         createdAt: now,
         createdBy,
       });
 
-      return { clientId, accountId, primary, secondary, createdAt: now, createdBy };
+      return {
+        clientId,
+        accountId,
+        primary,
+        createdAt: now,
+        createdBy,
+      };
     },
 
     async getByClientId(clientId) {
@@ -113,39 +119,42 @@ export function createApiKeyStore(options: ApiKeyStoreOptions): ApiKeyStore {
       const primaryMatch = await verifySecret(secret, key.primary.hash);
       if (primaryMatch) return key;
 
-      const secondaryMatch = await verifySecret(secret, key.secondary.hash);
-      if (secondaryMatch) return key;
+      if (key.secondary) {
+        const secondaryMatch = await verifySecret(secret, key.secondary.hash);
+        if (secondaryMatch) return key;
+      }
 
       return null;
     },
 
-    async rotatePrimary(clientId, newSecret, rotatedBy) {
+    async rotate(clientId, newSecret, rotatedBy) {
       const doc = await findByClientId(clientId);
       if (!doc) throw new Error(`API key ${clientId} not found`);
 
       const now = Math.floor(Date.now() / 1000);
       const newHash = await hashSecret(newSecret);
-      const newPrimary: SecretInfo = { hash: newHash, createdAt: now, createdBy: rotatedBy };
+      const oldPrimary = doc.data.primary as SecretInfo;
+
+      const newPrimary: SecretInfo = {
+        hash: newHash,
+        createdAt: now,
+        createdBy: rotatedBy,
+      };
 
       const updated = await storage.update(doc.id, {
         ...doc.data,
         primary: newPrimary,
+        secondary: oldPrimary,
       });
       return toApiKey(updated);
     },
 
-    async rotateSecondary(clientId, newSecret, rotatedBy) {
+    async dropSecondary(clientId) {
       const doc = await findByClientId(clientId);
       if (!doc) throw new Error(`API key ${clientId} not found`);
 
-      const now = Math.floor(Date.now() / 1000);
-      const newHash = await hashSecret(newSecret);
-      const newSecondary: SecretInfo = { hash: newHash, createdAt: now, createdBy: rotatedBy };
-
-      const updated = await storage.update(doc.id, {
-        ...doc.data,
-        secondary: newSecondary,
-      });
+      const { secondary: _, ...rest } = doc.data;
+      const updated = await storage.update(doc.id, rest);
       return toApiKey(updated);
     },
 

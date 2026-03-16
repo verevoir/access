@@ -24,8 +24,8 @@ function createMemoryStorage(): StorageAdapter {
       for (const doc of docs.values()) {
         if (doc.blockType !== blockType) continue;
         if (options?.where) {
-          const match = Object.entries(options.where).every(
-            ([k, v]) => (k === 'id' ? doc.id === v : doc.data[k] === v),
+          const match = Object.entries(options.where).every(([k, v]) =>
+            k === 'id' ? doc.id === v : doc.data[k] === v,
           );
           if (!match) continue;
         }
@@ -60,26 +60,19 @@ describe('createApiKeyStore', () => {
     });
   });
 
-  it('creates a key with hashed secrets and provenance', async () => {
-    const key = await store.create(
-      'cli_abc',
-      'acc_1',
-      'secret-primary',
-      'secret-secondary',
-      'user-admin',
-    );
+  it('creates a key with a single primary secret and provenance', async () => {
+    const key = await store.create('cli_abc', 'acc_1', 'my-secret', 'admin');
 
     expect(key.clientId).toBe('cli_abc');
     expect(key.accountId).toBe('acc_1');
-    expect(key.primary.hash).toBe('hashed:secret-primary');
-    expect(key.primary.createdBy).toBe('user-admin');
-    expect(key.secondary.hash).toBe('hashed:secret-secondary');
-    expect(key.secondary.createdBy).toBe('user-admin');
+    expect(key.primary.hash).toBe('hashed:my-secret');
+    expect(key.primary.createdBy).toBe('admin');
+    expect(key.secondary).toBeUndefined();
     expect(key.createdAt).toBeGreaterThan(0);
   });
 
   it('retrieves a key by client ID', async () => {
-    await store.create('cli_abc', 'acc_1', 'p', 's', 'admin');
+    await store.create('cli_abc', 'acc_1', 'p', 'admin');
     const found = await store.getByClientId('cli_abc');
     expect(found).not.toBeNull();
     expect(found!.clientId).toBe('cli_abc');
@@ -89,21 +82,15 @@ describe('createApiKeyStore', () => {
     expect(await store.getByClientId('nonexistent')).toBeNull();
   });
 
-  it('verifies against primary secret', async () => {
-    await store.create('cli_abc', 'acc_1', 'primary-s', 'secondary-s', 'admin');
-    const key = await store.verify('cli_abc', 'primary-s');
+  it('verifies against the primary secret', async () => {
+    await store.create('cli_abc', 'acc_1', 'my-secret', 'admin');
+    const key = await store.verify('cli_abc', 'my-secret');
     expect(key).not.toBeNull();
     expect(key!.clientId).toBe('cli_abc');
   });
 
-  it('verifies against secondary secret', async () => {
-    await store.create('cli_abc', 'acc_1', 'primary-s', 'secondary-s', 'admin');
-    const key = await store.verify('cli_abc', 'secondary-s');
-    expect(key).not.toBeNull();
-  });
-
   it('returns null for wrong secret', async () => {
-    await store.create('cli_abc', 'acc_1', 'p', 's', 'admin');
+    await store.create('cli_abc', 'acc_1', 'p', 'admin');
     expect(await store.verify('cli_abc', 'wrong')).toBeNull();
   });
 
@@ -111,43 +98,90 @@ describe('createApiKeyStore', () => {
     expect(await store.verify('nonexistent', 'any')).toBeNull();
   });
 
-  it('rotates the primary secret', async () => {
-    await store.create('cli_abc', 'acc_1', 'old-p', 'old-s', 'admin');
-    const rotated = await store.rotatePrimary('cli_abc', 'new-p', 'user-ops');
+  describe('rotate', () => {
+    it('promotes new secret to primary and demotes old primary to secondary', async () => {
+      await store.create('cli_abc', 'acc_1', 'original', 'admin');
+      const rotated = await store.rotate('cli_abc', 'new-secret', 'ops');
 
-    expect(rotated.primary.hash).toBe('hashed:new-p');
-    expect(rotated.primary.createdBy).toBe('user-ops');
-    // Secondary unchanged
-    expect(rotated.secondary.hash).toBe('hashed:old-s');
+      expect(rotated.primary.hash).toBe('hashed:new-secret');
+      expect(rotated.primary.createdBy).toBe('ops');
+      expect(rotated.secondary).toBeDefined();
+      expect(rotated.secondary!.hash).toBe('hashed:original');
+      expect(rotated.secondary!.createdBy).toBe('admin');
+    });
 
-    // Old primary no longer works
-    expect(await store.verify('cli_abc', 'old-p')).toBeNull();
-    // New primary works
-    expect(await store.verify('cli_abc', 'new-p')).not.toBeNull();
-    // Secondary still works
-    expect(await store.verify('cli_abc', 'old-s')).not.toBeNull();
+    it('new primary verifies after rotation', async () => {
+      await store.create('cli_abc', 'acc_1', 'original', 'admin');
+      await store.rotate('cli_abc', 'new-secret', 'ops');
+
+      expect(await store.verify('cli_abc', 'new-secret')).not.toBeNull();
+    });
+
+    it('old primary (now secondary) still verifies after rotation', async () => {
+      await store.create('cli_abc', 'acc_1', 'original', 'admin');
+      await store.rotate('cli_abc', 'new-secret', 'ops');
+
+      expect(await store.verify('cli_abc', 'original')).not.toBeNull();
+    });
+
+    it('rotating again replaces the secondary with the previous primary', async () => {
+      await store.create('cli_abc', 'acc_1', 'v1', 'admin');
+      await store.rotate('cli_abc', 'v2', 'ops');
+      const rotated = await store.rotate('cli_abc', 'v3', 'ops');
+
+      expect(rotated.primary.hash).toBe('hashed:v3');
+      expect(rotated.secondary!.hash).toBe('hashed:v2');
+
+      // v1 is gone
+      expect(await store.verify('cli_abc', 'v1')).toBeNull();
+      // v2 and v3 work
+      expect(await store.verify('cli_abc', 'v2')).not.toBeNull();
+      expect(await store.verify('cli_abc', 'v3')).not.toBeNull();
+    });
+
+    it('throws when rotating a nonexistent key', async () => {
+      await expect(
+        store.rotate('nonexistent', 'x', 'admin'),
+      ).rejects.toThrow('not found');
+    });
   });
 
-  it('rotates the secondary secret', async () => {
-    await store.create('cli_abc', 'acc_1', 'old-p', 'old-s', 'admin');
-    const rotated = await store.rotateSecondary('cli_abc', 'new-s', 'user-ops');
+  describe('dropSecondary', () => {
+    it('removes the secondary secret', async () => {
+      await store.create('cli_abc', 'acc_1', 'original', 'admin');
+      await store.rotate('cli_abc', 'new-secret', 'ops');
+      const dropped = await store.dropSecondary('cli_abc');
 
-    expect(rotated.secondary.hash).toBe('hashed:new-s');
-    expect(rotated.secondary.createdBy).toBe('user-ops');
-    // Primary unchanged
-    expect(rotated.primary.hash).toBe('hashed:old-p');
-  });
+      expect(dropped.primary.hash).toBe('hashed:new-secret');
+      expect(dropped.secondary).toBeUndefined();
+    });
 
-  it('throws when rotating a nonexistent key', async () => {
-    await expect(
-      store.rotatePrimary('nonexistent', 'x', 'admin'),
-    ).rejects.toThrow('not found');
+    it('old primary no longer verifies after drop', async () => {
+      await store.create('cli_abc', 'acc_1', 'original', 'admin');
+      await store.rotate('cli_abc', 'new-secret', 'ops');
+      await store.dropSecondary('cli_abc');
+
+      expect(await store.verify('cli_abc', 'original')).toBeNull();
+      expect(await store.verify('cli_abc', 'new-secret')).not.toBeNull();
+    });
+
+    it('is safe to call when there is no secondary', async () => {
+      await store.create('cli_abc', 'acc_1', 'original', 'admin');
+      const dropped = await store.dropSecondary('cli_abc');
+      expect(dropped.secondary).toBeUndefined();
+    });
+
+    it('throws for nonexistent key', async () => {
+      await expect(store.dropSecondary('nonexistent')).rejects.toThrow(
+        'not found',
+      );
+    });
   });
 
   it('lists keys by account', async () => {
-    await store.create('cli_1', 'acc_1', 'p', 's', 'admin');
-    await store.create('cli_2', 'acc_1', 'p', 's', 'admin');
-    await store.create('cli_3', 'acc_2', 'p', 's', 'admin');
+    await store.create('cli_1', 'acc_1', 'p', 'admin');
+    await store.create('cli_2', 'acc_1', 'p', 'admin');
+    await store.create('cli_3', 'acc_2', 'p', 'admin');
 
     const keys = await store.listByAccount('acc_1');
     expect(keys).toHaveLength(2);
@@ -155,7 +189,7 @@ describe('createApiKeyStore', () => {
   });
 
   it('revokes a key', async () => {
-    await store.create('cli_abc', 'acc_1', 'p', 's', 'admin');
+    await store.create('cli_abc', 'acc_1', 'p', 'admin');
     await store.revoke('cli_abc');
     expect(await store.getByClientId('cli_abc')).toBeNull();
   });
@@ -174,7 +208,7 @@ describe('createApiKeyAuthAdapter', () => {
       hashSecret,
       verifySecret,
     });
-    await keyStore.create('cli_abc', 'acc_1', 'my-secret', 'backup-secret', 'admin');
+    await keyStore.create('cli_abc', 'acc_1', 'my-secret', 'admin');
   });
 
   it('resolves a valid clientId:secret to an Identity', async () => {
@@ -188,9 +222,10 @@ describe('createApiKeyAuthAdapter', () => {
     });
   });
 
-  it('resolves with the secondary secret', async () => {
+  it('resolves with the secondary secret after rotation', async () => {
+    await keyStore.rotate('cli_abc', 'new-secret', 'ops');
     const adapter = createApiKeyAuthAdapter({ store: keyStore });
-    const identity = await adapter.resolve('cli_abc:backup-secret');
+    const identity = await adapter.resolve('cli_abc:my-secret');
     expect(identity).not.toBeNull();
     expect(identity!.id).toBe('acc_1');
   });

@@ -1,6 +1,6 @@
 {
   "name": "@verevoir/access",
-  "version": "0.2.0-beta.3",
+  "version": "0.2.0-beta.4",
   "description": "Identity resolution, policy evaluation, and workflow state machines",
   "homepage": "https://verevoir.io",
   "license": "MIT",

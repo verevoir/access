@@ -1,6 +1,6 @@
 {
   "name": "@verevoir/access",
-  "version": "0.2.0-beta.5",
+  "version": "0.2.0-beta.6",
   "description": "Identity resolution, policy evaluation, and workflow state machines",
   "homepage": "https://verevoir.io",
   "license": "MIT",
@@ -63,7 +63,7 @@
   },
   "peerDependencies": {
     "google-auth-library": "^9.0.0",
-    "@verevoir/storage": "0.3.0-beta.1"
+    "@verevoir/storage": "^0.3.0-beta.1"
   },
   "peerDependenciesMeta": {
     "google-auth-library": {
@@ -74,7 +74,7 @@
     }
   },
   "devDependencies": {
-    "@verevoir/storage": "0.3.0-beta.1",
+    "@verevoir/storage": "^0.3.0-beta.1",
     "@eslint/js": "^9.39.4",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",

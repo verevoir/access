@@ -62,8 +62,8 @@
     "format": "prettier --write ."
   },
   "peerDependencies": {
-    "google-auth-library": "^9.0.0",
-    "@verevoir/storage": "^1.0.0"
+    "@verevoir/storage": "^1.0.0",
+    "google-auth-library": "10.6.2"
   },
   "peerDependenciesMeta": {
     "google-auth-library": {
@@ -74,8 +74,8 @@
     }
   },
   "devDependencies": {
-    "@verevoir/storage": "^1.0.0",
     "@eslint/js": "^9.39.4",
+    "@verevoir/storage": "^1.0.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.1",

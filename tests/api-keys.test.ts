@@ -140,9 +140,9 @@ describe('createApiKeyStore', () => {
     });
 
     it('throws when rotating a nonexistent key', async () => {
-      await expect(
-        store.rotate('nonexistent', 'x', 'admin'),
-      ).rejects.toThrow('not found');
+      await expect(store.rotate('nonexistent', 'x', 'admin')).rejects.toThrow(
+        'not found',
+      );
     });
   });
 

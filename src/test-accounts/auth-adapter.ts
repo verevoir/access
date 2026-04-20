@@ -7,8 +7,27 @@ export interface TestAccount {
   identity: Identity;
 }
 
+/** Behaviour when a token is missing, malformed, or unknown. */
+export type UnknownTokenBehaviour = 'null' | 'anonymous';
+
 export interface TestAuthAdapterOptions {
   accounts: TestAccount[];
+  /**
+   * What to resolve for missing / unknown tokens.
+   *
+   * - `'null'` (default) — matches the contract of the Google / Apple /
+   *   OIDC adapters: an invalid token is an invalid token. Any consumer
+   *   code that rejects on `!identity` works the same way as in prod.
+   * - `'anonymous'` — legacy behaviour: fall back to the frozen
+   *   ANONYMOUS viewer identity. Only choose this if every downstream
+   *   path (including API auth) explicitly handles the anonymous case.
+   *
+   * Default changed from `'anonymous'` to `'null'` in v2.0.0 because
+   * the old default made it easy to accidentally leave API routes
+   * anonymously accessible when `AUTH_MODE=test` leaked into a
+   * non-local environment.
+   */
+  unknownTokens?: UnknownTokenBehaviour;
 }
 
 /**
@@ -25,11 +44,14 @@ export function createTestAuthAdapter(
   const lookup = new Map(
     options.accounts.map((account) => [account.token, account.identity]),
   );
+  const unknownTokens = options.unknownTokens ?? 'null';
+  const fallback: Identity | null =
+    unknownTokens === 'anonymous' ? ANONYMOUS : null;
 
   return {
-    resolve: async (token: unknown): Promise<Identity> => {
-      if (!token || typeof token !== 'string') return ANONYMOUS;
-      return lookup.get(token) ?? ANONYMOUS;
+    resolve: async (token: unknown): Promise<Identity | null> => {
+      if (!token || typeof token !== 'string') return fallback;
+      return lookup.get(token) ?? fallback;
     },
   };
 }

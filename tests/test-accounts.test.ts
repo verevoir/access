@@ -33,28 +33,43 @@ describe('createTestAuthAdapter', () => {
     expect(await adapter.resolve('bob-token')).toEqual(bob);
   });
 
-  it('returns ANONYMOUS for an unknown token', async () => {
-    const identity = await adapter.resolve('unknown-token');
-    expect(identity).toEqual(ANONYMOUS);
+  describe('default (unknownTokens: "null")', () => {
+    it('returns null for an unknown token', async () => {
+      const identity = await adapter.resolve('unknown-token');
+      expect(identity).toBeNull();
+    });
+
+    it('returns null for null', async () => {
+      expect(await adapter.resolve(null)).toBeNull();
+    });
+
+    it('returns null for undefined, empty string, or non-string tokens', async () => {
+      expect(await adapter.resolve(undefined)).toBeNull();
+      expect(await adapter.resolve('')).toBeNull();
+      expect(await adapter.resolve(12345)).toBeNull();
+      expect(await adapter.resolve({ token: 'x' })).toBeNull();
+    });
   });
 
-  it('returns ANONYMOUS for null', async () => {
-    const identity = await adapter.resolve(null);
-    expect(identity).toEqual(ANONYMOUS);
-  });
+  describe('unknownTokens: "anonymous" (opt-in legacy behaviour)', () => {
+    const legacy = createTestAuthAdapter({
+      accounts: [{ token: 'alice-token', identity: alice }],
+      unknownTokens: 'anonymous',
+    });
 
-  it('returns ANONYMOUS for undefined', async () => {
-    const identity = await adapter.resolve(undefined);
-    expect(identity).toEqual(ANONYMOUS);
-  });
+    it('returns ANONYMOUS for an unknown token', async () => {
+      expect(await legacy.resolve('unknown-token')).toEqual(ANONYMOUS);
+    });
 
-  it('returns ANONYMOUS for empty string', async () => {
-    const identity = await adapter.resolve('');
-    expect(identity).toEqual(ANONYMOUS);
-  });
+    it('returns ANONYMOUS for null / undefined / empty / non-string', async () => {
+      expect(await legacy.resolve(null)).toEqual(ANONYMOUS);
+      expect(await legacy.resolve(undefined)).toEqual(ANONYMOUS);
+      expect(await legacy.resolve('')).toEqual(ANONYMOUS);
+      expect(await legacy.resolve(12345)).toEqual(ANONYMOUS);
+    });
 
-  it('returns ANONYMOUS for non-string token', async () => {
-    expect(await adapter.resolve(12345)).toEqual(ANONYMOUS);
-    expect(await adapter.resolve({ token: 'x' })).toEqual(ANONYMOUS);
+    it('still resolves known tokens normally', async () => {
+      expect(await legacy.resolve('alice-token')).toEqual(alice);
+    });
   });
 });

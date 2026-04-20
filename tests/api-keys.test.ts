@@ -211,14 +211,14 @@ describe('createApiKeyAuthAdapter', () => {
     await keyStore.create('cli_abc', 'acc_1', 'my-secret', 'admin');
   });
 
-  it('resolves a valid clientId:secret to an Identity', async () => {
+  it('resolves a valid clientId:secret to an Identity with namespaced id + accountId in metadata', async () => {
     const adapter = createApiKeyAuthAdapter({ store: keyStore });
     const identity = await adapter.resolve('cli_abc:my-secret');
 
     expect(identity).toEqual({
-      id: 'acc_1',
+      id: 'apikey:cli_abc',
       roles: ['api'],
-      metadata: { clientId: 'cli_abc' },
+      metadata: { clientId: 'cli_abc', accountId: 'acc_1' },
     });
   });
 
@@ -227,7 +227,8 @@ describe('createApiKeyAuthAdapter', () => {
     const adapter = createApiKeyAuthAdapter({ store: keyStore });
     const identity = await adapter.resolve('cli_abc:my-secret');
     expect(identity).not.toBeNull();
-    expect(identity!.id).toBe('acc_1');
+    expect(identity!.id).toBe('apikey:cli_abc');
+    expect(identity!.metadata).toMatchObject({ accountId: 'acc_1' });
   });
 
   it('returns null for wrong secret', async () => {
